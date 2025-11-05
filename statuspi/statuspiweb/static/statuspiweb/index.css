@@ -1,0 +1,267 @@
+:root {
+  /* 🌑 Base */
+  --color-bg: #0e0e11;
+  --color-surface: #18181c;
+  --color-surface-alt: #202024;
+  --color-border: #2a2a2f;
+
+  /* 🍓 Raspberry Accent */
+  --color-accent: #c51a4a;   /* main Raspberry Pi pink */
+  --color-accent-light: #ff4b77;
+  --color-accent-dark: #8f0e32;
+
+  /* 🧊 Text */
+  --color-text: #e6e6e8;
+  --color-text-muted: #9b9ba1;
+  --color-text-accent: var(--color-accent-light);
+
+  /* 🌫 Shadows / Glow */
+  --shadow-accent: 0 0 10px rgba(197, 26, 74, 0.5);
+
+  /* 🧩 Status colors */
+  --ok: #3fd97f;
+  --warn: #ffd34e;
+  --error: #ff4d6d;
+
+  --font-base: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+html, body{
+    font-family: var(--font-base);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+header img{
+    height: 10em;          /* ~ cap height of text */
+    width: auto;             /* keep aspect ratio */
+    display: block; 
+}
+
+header{
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: center;
+}
+
+.headline h1{
+    font-size: 3rem;
+    margin: 0;
+}
+
+.headline h1 span{
+    color: var(--color-accent);
+}
+
+.headline h2{
+    color: var(--color-text-muted);
+}
+
+header .headline{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+tr *{
+    padding: 10px;
+}
+
+li{
+    padding: 0;
+}
+
+ul{
+    margin: 0;
+    padding: 0;
+}
+
+tr li{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+li h5{
+    margin: 0;
+    margin-right: 10px;
+}
+
+.section h3{
+    color: var(--color-accent);
+    font-size: 2rem;
+    margin: 20px;
+}
+
+.section{
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border: 1px solid var(--color-accent-dark);
+    border-radius: 10px;
+    margin: 20px;
+}
+
+.icons{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icons *{
+    color: var(--color-accent-dark);
+    font-size: 2rem;
+    padding: 10px;
+}
+
+.icons *:hover{
+    color: var(--color-accent-light);
+    cursor: pointer;
+}
+
+.content{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.refresh-dot {
+  display:inline-block;
+  width:8px; height:8px;
+  background:var(--color-accent);
+  border-radius:50%;
+  margin-left:6px;
+  animation:pulse 1.5s infinite;
+}
+
+#temp{
+    color: var(--temp-color);
+}
+
+tr p{
+    padding: 0;
+    margin: 0;
+}
+
+#ext_ip{
+    color: transparent;
+}
+
+#ext_ip:hover {
+    color: var(--color-text);
+}
+
+.refreshRate{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.refreshRate *{
+    margin: 0;
+}
+
+.refreshRate select, #tempUnit{
+    margin-left: 10px;
+    background-color: transparent;
+    color: var(--color-accent);
+    font-family: inherit;
+    border-radius: 10px;
+    border: 1px solid var(--color-accent-dark);
+}
+
+.refreshRate option, #tempUnit option{
+    background-color: var(--color-bg);
+}
+
+#refresh{
+    margin-top: 0;
+}
+
+.info{
+    color: var(--color-accent-dark);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.info:hover{
+    color: var(--color-accent-light);
+    cursor: pointer;
+}
+
+.info p{
+    color: var(--color-text);
+    display: none;
+    width: 200px;
+    position: fixed;
+    right: 510px;
+    background-color: var(--color-bg);
+    border: 1px solid var(--color-accent-dark);
+    border-radius: 10px;
+    padding: 10px;
+
+}
+
+.bar{
+    background-color: var(--color-surface);
+    padding: 0;
+    border-radius: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.fill {
+    border-radius: 10px;
+}
+
+.disk{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid var(--color-accent-dark);
+    border-radius: 10px;
+    margin: 10px;
+}
+
+.spacer{
+    width: 90%;
+    padding: 1px;
+    background-color: var(--color-accent-dark);
+    border-radius: 10px;
+}
+
+.disk > h5{
+    color: var(--color-accent);
+    padding: 20px;
+    margin: 20px;
+}
+
+small{
+    color: var(--color-text-muted);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#smem{
+    color: var(--color-text-muted);
+}
+
+.process:hover{
+    cursor: pointer;
+    background-color: var(--color-border);
+}

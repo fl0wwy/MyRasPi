@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static "statuspiweb/index.css" %}">
+    <script src="https://kit.fontawesome.com/552e1619ab.js" crossorigin="anonymous"></script>
+    <title>MyRasPi</title>
+</head>
+<body>
+    <header>
+        <div class="headline">
+            <h1>My <span>RasPi</span></h1>
+            <h2>Status portal for Raspberry Pi</h2>
+        </div>
+        <img src="{% static "statuspiweb/rasplogo.png" %}" alt="Raspberry Pi logo">  
+    </header>
+    
+    <div class="refreshRate"><p>Refresh rate: </p><select name="refreshrate" id="refreshrate">
+        <option value="1000">1Hz</option>
+        <option value="2000">2Hz</option>
+        <option value="3000">3Hz</option>
+        <option value="5000">5Hz</option>
+        <option value="10000">10Hz</option>
+        <option value="15000">15Hz</option>
+    </select></div>
+    <p id='refresh'>Latest refresh: {{ timestamp }}</p><span class="refresh-dot"></span>
+    <div class="icons">
+            <div class="icon" id='health'><i class="fa-solid fa-notes-medical"></i></div>
+            <div class="icon" id='processes'><i class="fa-solid fa-cubes"></i></div>
+            <div class="icon" id='connection'><i class="fa-solid fa-wifi"></i></div>
+            <div class="icon" id='sysid'><i class="fa-solid fa-circle-info"></i></div>
+        </div>
+    <div class="content">
+        <div class="sections">
+            <div class="section"  id='health' style='display: flex;'>
+                <h3>System Health</h3>
+                <table>
+                    <tr>
+                        <th>CPU</th>
+                        <td>
+                            <ul>
+                                <li><h5>Usage:</h5> <p id="cpu-usage">{{ cpu.usage }}%</p></li>
+                                <li><h5>Per core:</h5> <p id="per_core">{{ cpu.per_core }}</p></li>
+                                <li><h5>Load Avg:</h5> <p id="load_avg">{{ cpu.load_avg }}</p><div class="info" id='loadAvg'></div></li>
+                                <li><h5>Speed:</h5> <p id="freq">{{ cpu.freq }} GHz</p></li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Temperature <select name="tempUnit" id="tempUnit"><option value="C">°C</option><option value="F">°F</option></select></th>
+                        <td><p id="temp">{{ temp_c }}</p></td>
+                    </tr>
+                    <tr>
+                        <th>Memory</th>
+                        <td><p id='mem'>{{ memory.used_human }} / {{ memory.total_human }} ({{ memory.percent }}%) - {{ memory.available_human }} free</p>
+                            <div class="bar" id="mem-bar"><div class="fill"></div></div>
+                            <span style=' padding:0;'>Swap memory: </span><p id='smem'> {{ memory.swap.used_human }} / {{ memory.swap.total_human }} ({{ memory.swap.percent }}%)</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>{% if disks|length > 1 %}Disks{% else %}Disk{% endif %}</th>
+                        <td>
+                            {% for disk in disks %}
+                            <div class="disk">
+                                <h5>{{ disk.mount }}</h5>
+                                <ul>
+                                    <li><h5>Disk space:</h5>
+                                        <div>
+                                            <p id='space'>{{ disk.used_human }} / {{ disk.total_human }} ({{ disk.percent }}%) - {{ disk.free_human}} free</p>
+                                            <div class="bar" id="diskBar"><div class="fill"></div></div>
+                                        </div>
+                                    </li>
+                                    <li><h5>Disk I/O:</h5>
+                                        <ul>
+                                            <li>
+                                                <h5>Read rate</h5><p id="read">{{ disk.read_rate }}</p>
+                                            </li>
+                                            <li>
+                                                <h5>Write rate</h5><p id="write">{{ disk.write_rate }}</p>
+                                            </li>
+                                        </ul>
+                                    </li>
+                                    <li><small style='padding:0;'><h5>fstype:</h5>{{ disk.fstype }}</small></li>
+                                    <li><small style='padding:0;'><h5>Device:</h5>{{ disk.device }}</small></li>
+                                </ul>
+                            </div>    
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Uptime</th>
+                        <td><p id="uptime">{{ uptime }}</p></td>
+                    </tr>
+                    <tr>
+                        <th>Power supply</th>
+                        <td id='power'>
+                            <p id="power-message">{{ power.status.message }} ({{ power.flags.raw }})</p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="section" id='processes'>
+                <h3>Processes</h3>
+                <table>
+                    <tr><th>ID</th><th>Name</th><th>CPU</th><th>Memory</th><th>Read</th><th>Write</th></tr>
+                    {% comment %} {% for process in processes %}
+                        <tr>
+                            {% for k, v in process.items %}
+                                {% if k == 'cpu_pct' or k == 'mem_pct' %}
+                                    <td id='{{ k }}'>{{ v }}%</td>    
+                                {% else %}
+                                    <td id='{{ k }}'>{{ v }}</td>
+                                {% endif %}  
+                            {% endfor %}
+                        </tr>   
+                    {% endfor %} {% endcomment %}
+                </table>
+            </div>
+            <div class="section" id='connection'>
+                <h3>Network & Connectivity</h3>
+                <table>
+                    <tr>
+                        <th>Local IP</th>
+                        <td>{{ int_ip }}</td>
+                    </tr>
+                    <tr>
+                        <th>External IP</th>
+                        <td style='display: flex; align-items: center;'><p id="ext_ip">{{ ext_ip }}</p><small>(hover to reveal)</small></td>
+                    </tr>
+                    <tr>
+                        <th>Network</th>
+                        <td>
+                            <ul>
+                                <li><h5>Upload speed:</h5> <p id="net-up">{{ network.up_human }}</p></li>
+                                <li><h5>Download speed:</h5><p id="net-dn">{{ network.dn_human }}</p></li>
+                            </ul>
+                        </td>  
+                    </tr>
+                    <tr>
+                        <th>Wi-Fi</th>
+                        <td>
+                            <ul>
+                                <li><h5>SSID:</h5> {{ wifi.ssid }}</li>
+                                <li><h5>Signal Strength:</h5> <p id="wifi">{{ wifi.signal_pct }}</p></li>
+                                {% comment %} <li><h5>RSSI:</h5> {{ wifi.rssi_dbm }}dBm</li>
+                                <li><h5>Bitrate:</h5> {{ wifi.bitrate_mbps }}Mbps</li> {% endcomment %}
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Ping</th>
+                        <td>
+                            <ul>
+                                <li><h5>Internet:</h5> <p id="pingI">{{ internet_ms }}ms</p></li>
+                                <li><h5>Router:</h5> <p id="pingR">{{ router_ms }}ms</p></li>
+                            </ul>
+                        </td>
+                    </tr>
+                </table>
+                
+            </div>
+            <div class="section" id='sysid'>
+                <h3>System ID</h3>
+                <table>
+                    <tr>
+                        <th>Model</th>
+                        <td>{{ model }}</td>
+                    </tr>
+                    <tr>
+                        <th>Hostname</th>
+                        <td>{{ hostname }}</td>
+                    </tr>
+                    <tr>
+                        <th>OS Info</th>
+                        <td>{{ os }}</td>
+                    </tr>
+                    <tr>
+                        <th>Kernel</th>
+                        <td>{{ kernel }}</td>
+                    </tr>
+                    <tr>
+                        <th>Architecture</th>
+                        <td>{{ architecture }}</td>
+                    </tr>
+                    <tr>
+                        <th>Python version</th>
+                        <td>{{ python_version }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div> 
+<script src='{% static "statuspiweb/script.js" %}'></script>      
+</body>
+</html>
