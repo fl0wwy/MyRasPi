@@ -3,8 +3,8 @@ const ICONS = document.querySelectorAll('.icon')
 const select = document.getElementById('refreshrate')
 const unit = document.getElementById('tempUnit')
 
-select.value = localStorage.getItem('refresh') ? localStorage.getItem('refresh') : '3000'
-unit.value = localStorage.getItem('unit') ? localStorage.getItem('unit') : 'C'
+select.value = localStorage.getItem('refresh') ?? '3000'
+unit.value = localStorage.getItem('unit') ?? 'C'
 
 async function loadMetrics() {
   try {
@@ -16,7 +16,6 @@ async function loadMetrics() {
     console.error("metrics fetch failed", e);
   }
 }
-
 
 function render(m) {
 
@@ -40,8 +39,13 @@ function render(m) {
   setText("#load_avg", m.cpu.load_avg);
   setText("#net-up",  m.network.up_human ?? "-");
   setText("#net-dn",  m.network.dn_human ?? "-");
+  
+  
   setText("#pingI",  (m.internet_ms ?? "–") + "ms");
+  document.getElementById('pingI').style.color = m.internet_ms > 100 ? "#ff4d6d" : m.internet_ms >= 20 ? "#ffd34e" : "#3fd97f"
+  
   setText("#pingR",  (m.router_ms ?? "–") + "ms");
+  document.getElementById('pingR').style.color = m.router_ms > 15 ? "#ff4d6d" : m.router_ms >= 5 ? "#ffd34e" : "#3fd97f"
 
   const tempColor=
     m.temp_c > 85 ? "#ff4d6d" :
@@ -50,7 +54,7 @@ function render(m) {
 
   setText("#smem", `${m.memory.swap.used_human} / ${m.memory.swap.total_human} (${m.memory.swap.percent}%)`);
   const smemPct = m.memory.swap.percent
-  document.getElementById('smem').style.color = smemPct >= 60 ? "#ff4d6d" : smemPct >= 20 ? "#ffd34e" : "#3fd97f";
+  document.getElementById('smem').style.color = smemPct >= 60 ? "#ff4d6d" : smemPct >= 20 ? "#ffd34e" : smemPct === 0 ? "grey" : "#3fd97f";
   
   setText("#mem", `${m.memory.used_human} / ${m.memory.total_human} (${m.memory.percent}%) - ${m.memory.available_human} free`);
   const bar = document.querySelector("#mem-bar .fill");
@@ -96,7 +100,7 @@ function render(m) {
   }
 
   const processTable = document.querySelector('#processes table')
-  processTable.innerHTML = '<tr><th>ID</th><th>Name</th><th>CPU</th><th>Memory</th><th>Read</th><th>Write</th></tr>'
+  processTable.innerHTML = '<tr><th>Name</th><th>CPU</th><th>Memory</th><th>Read</th><th>Write</th></tr>'
   for (let i = 0; i < m.processes.length; i++) {
     const process = m.processes[i];
     
@@ -105,7 +109,7 @@ function render(m) {
     row.id = process.name + process.pid
     processTable.appendChild(row)
 
-    row.setAttribute('marked', localStorage.getItem(row.id) ? localStorage.getItem(row.id) : false)
+    row.setAttribute('marked', localStorage.getItem(row.id) ?? false)
     if (row.getAttribute('marked') === 'true') {
       row.style.backgroundColor = "#8f0e32"
     }
@@ -127,17 +131,15 @@ function render(m) {
         })
       }
       else{
+        row.style.backgroundColor = 'transparent'
+        
         row.marked = false
         localStorage.setItem(row.id, false)
-
-        row.style.backgroundColor = 'transparent'
       }
     })
-    
-    const pid = document.createElement("td")
-    pid.textContent = process.pid
 
     const name = document.createElement("td")
+    name.className = 'name'
     name.textContent = process.name
     
     const cpu_pct = document.createElement("td")
@@ -152,30 +154,17 @@ function render(m) {
     const write_bytes = document.createElement("td")
     write_bytes.textContent = process.write_bytes 
 
-    row.appendChild(pid)
     row.appendChild(name)
     row.appendChild(cpu_pct)
     row.appendChild(mem_pct)
     row.appendChild(read_bytes)
     row.appendChild(write_bytes)
-
   }
 }
+
 function setText(sel, txt){ const el=document.querySelector(sel); if(el) el.textContent=txt; }
 
 loadMetrics();
-
-function diskIdFromMount(mount) {
-  if (mount === "/") return "disk-root";
-  // remove leading/trailing slashes
-  let id = mount.replace(/^\/+|\/+$/g, "");
-  // replace remaining slashes with underscores
-  id = id.replace(/\//g, "_");
-  // replace spaces or weird chars with underscores
-  id = id.replace(/[^a-zA-Z0-9_-]/g, "_");
-  // prefix with "disk-" so IDs never start with a number
-  return "disk-" + id;
-}
 
 let timer;
 function setRate(val) {
@@ -188,6 +177,17 @@ select.addEventListener("change", () => {
 });
 setRate(parseFloat(select.value)); // initial
 
+function diskIdFromMount(mount) {
+  if (mount === "/") return "disk-root";
+  // remove leading/trailing slashes
+  let id = mount.replace(/^\/+|\/+$/g, "");
+  // replace remaining slashes with underscores
+  id = id.replace(/\//g, "_");
+  // replace spaces or weird chars with underscores
+  id = id.replace(/[^a-zA-Z0-9_-]/g, "_");
+  // prefix with "disk-" so IDs never start with a number
+  return "disk-" + id;
+}
 
 ICONS.forEach(icon => {
     icon.id === 'health' ? icon.setAttribute('active', true) : icon.setAttribute('active', false)
@@ -211,23 +211,3 @@ ICONS.forEach(icon => {
 
     })
 });
-
-document.querySelectorAll('.process').forEach(proc => {
-  proc.addEventListener('click', () => {
-    if (!proc.marked) {
-      proc.marked = true
-      localStorage.setItem(proc.id, true)
-
-      document.querySelectorAll('.process').forEach(proc2 => {
-        if (proc2 != proc) {
-          proc2.marked = false
-          localStorage.setItem(proc2.id, false)
-        }
-      })
-    }
-    else{
-      proc.marked = false
-      localStorage.setItem(proc.id, false)
-    }
-  })
-})

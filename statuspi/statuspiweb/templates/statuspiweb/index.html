@@ -75,15 +75,13 @@
                                     <li><h5>Disk I/O:</h5>
                                         <ul>
                                             <li>
-                                                <h5>Read rate</h5><p id="read">{{ disk.read_rate }}</p>
+                                                <h5>Read</h5><p id="read">{{ disk.read_rate }}</p>
                                             </li>
                                             <li>
-                                                <h5>Write rate</h5><p id="write">{{ disk.write_rate }}</p>
+                                                <h5>Write</h5><p id="write">{{ disk.write_rate }}</p>
                                             </li>
                                         </ul>
                                     </li>
-                                    <li><small style='padding:0;'><h5>fstype:</h5>{{ disk.fstype }}</small></li>
-                                    <li><small style='padding:0;'><h5>Device:</h5>{{ disk.device }}</small></li>
                                 </ul>
                             </div>    
                             {% endfor %}
@@ -104,7 +102,7 @@
             <div class="section" id='processes'>
                 <h3>Processes</h3>
                 <table>
-                    <tr><th>ID</th><th>Name</th><th>CPU</th><th>Memory</th><th>Read</th><th>Write</th></tr>
+                    <tr><th>Name</th><th>CPU</th><th>Memory</th><th>Read</th><th>Write</th></tr>
                     {% comment %} {% for process in processes %}
                         <tr>
                             {% for k, v in process.items %}
@@ -139,14 +137,21 @@
                         </td>  
                     </tr>
                     <tr>
-                        <th>Wi-Fi</th>
+                        <th>Connection</th>
                         <td>
-                            <ul>
-                                <li><h5>SSID:</h5> {{ wifi.ssid }}</li>
-                                <li><h5>Signal Strength:</h5> <p id="wifi">{{ wifi.signal_pct }}</p></li>
-                                {% comment %} <li><h5>RSSI:</h5> {{ wifi.rssi_dbm }}dBm</li>
-                                <li><h5>Bitrate:</h5> {{ wifi.bitrate_mbps }}Mbps</li> {% endcomment %}
-                            </ul>
+                            {% if connection.type == "Wi-Fi" %}
+                                <ul>
+                                    <li><h5>Type: </h5>{{ connection.type }} ({{ connection.iface }})</li>
+                                    <li><h5>SSID:</h5> {{ wifi.ssid }}</li>
+                                    <li><h5>Signal Strength:</h5> <p id="wifi">{{ wifi.signal_pct }}</p></li>
+                      
+                                    {% comment %} <li><h5>RSSI:</h5> {{ wifi.rssi_dbm }}dBm</li>
+                                    <li><h5>Bitrate:</h5> {{ wifi.bitrate_mbps }}Mbps</li> {% endcomment %}
+                                </ul>
+                            {% else %}
+                                {{ connection.type }} ({{ connection.iface }})
+                            {% endif %}
+                            
                         </td>
                     </tr>
                     <tr>
@@ -192,6 +197,7 @@
             </div>
         </div>
     </div> 
+<footer></footer>    
 <script src='{% static "statuspiweb/script.js" %}'></script>      
 </body>
 </html>

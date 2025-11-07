@@ -84,6 +84,8 @@ def get_router_ip():
     return None
 
 def ping_ms(host=get_router_ip(), timeout=2):
+    """Pings an IP address to check latency
+    """
     try:
         out = subprocess.check_output(
             ["ping", "-c", "1", "-w", str(timeout), host],
@@ -94,6 +96,53 @@ def ping_ms(host=get_router_ip(), timeout=2):
         return float(m.group(1)) if m else None
     except subprocess.CalledProcessError:
         return None
+
+def get_active_network():
+    """Retrieves network connection type
+
+    Returns:
+        Dict: Network connection data
+    """
+    interfaces = psutil.net_if_addrs()
+    stats = psutil.net_if_stats()
+    active = []
+
+    for name, addrs in interfaces.items():
+        if name not in stats or not stats[name].isup:
+            continue  # skip inactive
+
+        for addr in addrs:
+            if addr.family == socket.AF_INET and addr.address != "127.0.0.1":
+                active.append({
+                    "name": name,
+                    "ip": addr.address,
+                    "speed": stats[name].speed,  # may be 0 if unknown
+                    "mtu": stats[name].mtu,
+                })
+
+    # Decide which to use as primary
+    if not active:
+        return {"type": "none", "iface": None, "ip": None}
+
+    # Heuristic: prefer eth0 > wlan0 > anything else
+    preferred = sorted(active, key=lambda x: ("eth" not in x["name"], "wlan" not in x["name"]))
+    primary = preferred[0]
+
+    # Determine type
+    if primary["name"].startswith("eth"):
+        net_type = "Ethernet"
+    elif primary["name"].startswith("wlan"):
+        net_type = "Wi-Fi"
+    else:
+        net_type = "Other"
+
+    return {
+        "type": net_type,
+        "iface": primary["name"],
+        "ip": primary["ip"],
+        "speed": primary["speed"],
+        "mtu": primary["mtu"]
+    }
 
 def wifi_info():
     """
@@ -169,6 +218,8 @@ def rssi_to_percent(rssi_dbm):
     return int(round((rssi_dbm + 90) * (100/60.0)))    
 
 def get_temp_c():
+    """Retrieves vcgencmd cpu/gpu temp
+    """
     try:
         out = subprocess.check_output(["vcgencmd", "measure_temp"], text=True).strip()
         if out.startswith("temp=") and out.endswith("'C"):
@@ -219,6 +270,9 @@ def bytes_to_human(n: int) -> str:
     return f"{n:.1f} TB"
 
 def normalize_dev_name(device_path):
+    """Helper function that turns device name from psutil.disk_partitions
+    to perdisk format in psutil.disk_io_counters
+    """
     if not device_path.startswith("/dev/"):
         return None
     name = device_path.split("/dev/")[1]
@@ -258,7 +312,7 @@ def get_disks_info():
         try:
             usage = psutil.disk_usage(part.mountpoint)
             
-            if normalize_dev_name(part.device) in bio and normalize_dev_name(part.device):
+            if normalize_dev_name(part.device) in bio and normalize_dev_name(part.device) in aio:
                 read_rate  = (bio[normalize_dev_name(part.device)].read_bytes  - aio[normalize_dev_name(part.device)].read_bytes) / dt
                 write_rate = (bio[normalize_dev_name(part.device)].write_bytes - aio[normalize_dev_name(part.device)].write_bytes) / dt 
             else:
@@ -289,6 +343,11 @@ def get_disks_info():
     return disks
 
 def get_memory_info():
+    """Retrieves memory info
+
+    Returns:
+        Dict: Memory data
+    """
     vm = psutil.virtual_memory()
     sm = psutil.swap_memory()
     return {
@@ -333,6 +392,14 @@ def get_power_flags():
     }
 
 def power_status_from_flags(flags):
+    """Decodes the flags from get_power_flags to readable messages
+
+    Args:
+        flags (Dict): get_power_flags
+
+    Returns:
+        Dict: Level and message decoded from flags
+    """
     if flags is None:
         return {
             "level": "unknown",
@@ -361,6 +428,11 @@ def power_status_from_flags(flags):
     }
 
 def get_top_processes():
+    """Return a list of all processes 
+
+    Returns:
+        List: List of all processes 
+    """
     procs = []
 
     for p in psutil.process_iter(attrs=["pid", "name", "cpu_percent"]):
@@ -398,10 +470,16 @@ def get_top_processes():
     return procs
 
 def get_metrics():
+    """Returns the dictionary of all the parameters
+
+    Returns:
+        Dictionary: The dictionary of all the parameters
+    """
     load1, load5, load15 = psutil.getloadavg()
     net = get_net_totals_and_rates()
     disks  = get_disks_info()
     memory = get_memory_info()
+    connection = get_active_network()
 
     power_flags = get_power_flags()
     power_status = power_status_from_flags(power_flags)
@@ -411,22 +489,24 @@ def get_metrics():
 
     return {
         "timestamp": datetime.now().strftime("%d/%m/%Y, %H:%M:%S"),
-        "hostname": platform.node(),
-        "os": platform.platform(),
-        "kernel": os.uname().release,
-        "processes": get_top_processes(),
+        
         "cpu": {
             "usage": psutil.cpu_percent(),
             "per_core": '%, '.join(map(lambda x: str(x) ,psutil.cpu_percent(percpu=True))) + "%",
             "load_avg": f'({round(load1, 3)}, {round(load5, 3)}, {round(load15, 3)}) / {os.cpu_count()} cores',
             "freq": psutil.cpu_freq().current / 1000 if psutil.cpu_freq() else None,
         },
+        'temp_c': get_temp_c(),
         "memory": memory,
         "disks": [ disk for disk in disks],
         "power": {
             "flags": power_flags,   # raw + booleans
             "status": power_status, # level + message
         },
+        "uptime": uptime_to_human(int(time.time() - psutil.boot_time())),
+
+        "processes": get_top_processes(),
+        
         "network": {
             "bytes_sent": net["bytes_sent"],
             "bytes_recv": net["bytes_recv"],
@@ -435,14 +515,17 @@ def get_metrics():
             "up_human": bps_to_human(net["up_bps"]),
             "dn_human": bps_to_human(net["dn_bps"]),
         },
-        "uptime": uptime_to_human(int(time.time() - psutil.boot_time())),
         "int_ip": socket.gethostbyname(socket.gethostname()),
         "ext_ip": str(requests.get('https://api.ipify.org/').content)[1:].strip("'"),
-        "python_version": sys.version,
-        "architecture": platform.machine(),
         "internet_ms": ping_ms("8.8.8.8"),
         "router_ms": ping_ms(),
-        "wifi": wifi_info(),
-        'temp_c': get_temp_c(),
-        "model": f'{model} ({ceil(float(memory['total_human'].strip('GB')))}GB RAM)'
+        "connection": connection,
+        "wifi": wifi_info() if connection["type"] == "Wi-Fi" else None,
+        
+        "model": f'{model} ({ceil(float(memory['total_human'].strip('GB')))}GB RAM)',
+        "hostname": platform.node(),
+        "os": os.uname().sysname,
+        "kernel": os.uname().release,
+        "python_version": sys.version,
+        "architecture": platform.machine(),
     }

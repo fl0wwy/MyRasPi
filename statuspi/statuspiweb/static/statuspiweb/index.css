@@ -39,6 +39,8 @@ html, body{
     display: flex;
     flex-direction: column;
     align-items: center;
+    overflow-x: hidden;
+    font-size: 1rem;
 }
 
 header img{
@@ -186,6 +188,11 @@ tr p{
     background-color: var(--color-bg);
 }
 
+#tempUnit{
+    padding: 0;
+    margin: 10px;
+}
+
 #refresh{
     margin-top: 0;
 }
@@ -264,4 +271,81 @@ small{
 .process:hover{
     cursor: pointer;
     background-color: var(--color-border);
+}
+
+#processes td {
+    white-space: normal;   /* allow text to wrap */
+    word-wrap: break-word; /* break long words if needed */
+    word-break: break-word; /* ensure overflow text breaks */
+}
+
+#processes table{
+    border-collapse: collapse;
+}
+
+#processes table *{
+    border: 1px solid var(--color-border);
+    text-align: center;
+}
+
+td.name {
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+/* 1) Small phones (<= 480px) */
+@media (max-width: 480px) {
+    header{
+        font-size: 0.5rem;
+    }
+
+    .section{
+        font-size: 0.7rem;
+        width: 90vw;
+    }
+
+    .section h3{
+        font-size: 1rem;
+    }
+
+}
+
+/* 2) Phones / narrow screens (481px – 767px) */
+@media (min-width: 481px) and (max-width: 767px) {
+  /* portrait phones & small landscape phones */
+}
+
+/* 3) Tablets / small devices (768px – 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* iPad portrait, small tablets */
+}
+
+/* 4) Medium / laptops (1024px – 1279px) */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  html, body{
+    font-size: 1.2rem;
+  }
+
+  header{
+    font-size: 2rem;
+    justify-content: center;
+  }
+
+  header h2{
+    text-align: center;
+  }
+
+  .refreshRate select, .refreshRate, #refresh{
+    font-size: 2rem;
+  }
+}
+
+/* Landscape-only tweaks */
+@media (orientation: landscape) {
+  html, body{
+    width: 100vw;
+  }
 }
