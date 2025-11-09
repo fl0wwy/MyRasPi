@@ -12,7 +12,7 @@
 <body>
     <header>
         <div class="headline">
-            <h1>My <span>RasPi</span></h1>
+            <h1>My<span>RasPi</span></h1>
             <h2>Status portal for Raspberry Pi</h2>
         </div>
         <img src="{% static "statuspiweb/rasplogo.png" %}" alt="Raspberry Pi logo">  
@@ -198,7 +198,13 @@
             </div>
         </div>
     </div> 
-<footer></footer>    
+<footer>
+  <span>Raspberry Pi Status Portal</span>
+  <span>•</span>
+  <span>© 2025 <a href="https://github.com/fl0wwy" target="_blank">Bar Ben Waiss</a></span>
+  <span>•</span>
+  <span>Last updated: <span id="last-updated">09/11/2025</span></span>
+</footer>    
 <script src='{% static "statuspiweb/script.js" %}'></script>      
 </body>
 </html>

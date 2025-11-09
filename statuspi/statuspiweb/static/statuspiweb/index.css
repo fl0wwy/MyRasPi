@@ -40,13 +40,15 @@ html, body{
     flex-direction: column;
     align-items: center;
     overflow-x: hidden;
-    font-size: 1rem;
+    font-size: 0.9rem;
+    margin: 0;
 }
 
 header img{
-    height: 10em;          /* ~ cap height of text */
+    height: 7em;          /* ~ cap height of text */
     width: auto;             /* keep aspect ratio */
     display: block; 
+    padding: 0;
 }
 
 header{
@@ -54,11 +56,18 @@ header{
     flex-direction: row-reverse;
     align-items: center;
     justify-content: center;
+    height: 10vh;
+    margin-bottom: 10px;
+}
+
+header *{
+    padding: 10px;
 }
 
 .headline h1{
-    font-size: 3rem;
+    font-size: 2rem;
     margin: 0;
+    padding: 0;
 }
 
 .headline h1 span{
@@ -67,6 +76,9 @@ header{
 
 .headline h2{
     color: var(--color-text-muted);
+    margin: 0;
+    padding: 0;
+    text-align: center;
 }
 
 header .headline{
@@ -313,6 +325,17 @@ td.name {
 
 }
 
+footer{
+    color: var(--color-text-muted);
+    max-width: 90vw;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+footer a{
+    color: var(--color-accent-dark);
+}
+
 /* 2) Phones / narrow screens (481px – 767px) */
 @media (min-width: 481px) and (max-width: 767px) {
   /* portrait phones & small landscape phones */
@@ -326,11 +349,11 @@ td.name {
 /* 4) Medium / laptops (1024px – 1279px) */
 @media (min-width: 1024px) and (max-width: 1279px) {
   html, body{
-    font-size: 1.2rem;
+    font-size: 0.9rem;
   }
 
   header{
-    font-size: 2rem;
+    font-size: 1rem;
     justify-content: center;
   }
 
@@ -339,7 +362,7 @@ td.name {
   }
 
   .refreshRate select, .refreshRate, #refresh{
-    font-size: 2rem;
+    font-size: 1rem;
   }
 }
 
