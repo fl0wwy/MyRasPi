@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os 
 from pathlib import Path
 from django.core.management.utils import get_random_secret_key
 
@@ -20,11 +21,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
+SECRET_FILE = os.path.join(BASE_DIR, "secret.txt")
+
+def get_or_create_secret_key():
+    if os.path.exists(SECRET_FILE):
+        with open(SECRET_FILE) as f:
+            return f.read().strip()
+    key = get_random_secret_key()
+    with open(SECRET_FILE, "w") as f:
+        f.write(key)
+    return key
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = get_random_secret_key()
+SECRET_KEY = get_or_create_secret_key()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1', '0.0.0.0']
 
