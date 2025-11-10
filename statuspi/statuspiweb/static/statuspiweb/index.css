@@ -32,6 +32,29 @@
   50% { opacity: 1; }
 }
 
+/* General look */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px; /* for horizontal ones */
+}
+
+/* Track (background) */
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+  border-radius: 10px;
+}
+
+/* Handle (the draggable thumb) */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--color-accent-dark), var(--color-accent));
+  border-radius: 10px;
+}
+
+/* Hover effect */
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--color-accent), var(--color-accent-light));
+}
+
 html, body{
     font-family: var(--font-base);
     background-color: var(--color-bg);
@@ -251,7 +274,7 @@ tr p{
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border: 1px solid var(--color-accent-dark);
+    border-bottom: 1px solid var(--color-accent-dark);
     border-radius: 10px;
     margin: 10px;
 }
@@ -267,6 +290,10 @@ tr p{
     color: var(--color-accent);
     padding: 20px;
     margin: 20px;
+    max-width: 100px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 small{
@@ -285,6 +312,7 @@ small{
     background-color: var(--color-border);
 }
 
+
 #processes td {
     white-space: normal;   /* allow text to wrap */
     word-wrap: break-word; /* break long words if needed */
@@ -293,6 +321,9 @@ small{
 
 #processes table{
     border-collapse: collapse;
+    max-height: 50vh;
+    display: block;
+    overflow-y: auto;
 }
 
 #processes table *{
@@ -315,7 +346,7 @@ td.name {
     }
 
     .section{
-        font-size: 0.7rem;
+        font-size: 0.5rem;
         width: 90vw;
     }
 
@@ -334,6 +365,14 @@ footer{
 
 footer a{
     color: var(--color-accent-dark);
+}
+
+#disks{
+    max-height: 18vh;
+    overflow-y: auto;
+    display: block; 
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
 }
 
 /* 2) Phones / narrow screens (481px – 767px) */

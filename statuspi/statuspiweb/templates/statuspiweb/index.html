@@ -62,7 +62,7 @@
                     </tr>
                     <tr>
                         <th>{% if disks|length > 1 %}Disks{% else %}Disk{% endif %}</th>
-                        <td>
+                        <td id='disks'>
                             {% for disk in disks %}
                             <div class="disk">
                                 <h5>{{ disk.mount }}</h5>
