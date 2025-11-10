@@ -498,7 +498,7 @@ def get_metrics():
         },
         'temp_c': get_temp_c(),
         "memory": memory,
-        "disks": [ disk for disk in disks],
+        "disks": [disk for disk in disks],
         "power": {
             "flags": power_flags,   # raw + booleans
             "status": power_status, # level + message

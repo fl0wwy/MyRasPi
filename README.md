@@ -40,7 +40,7 @@ sudo apt install -y python3 python3-venv python3-pip git \
 
 ```bash
 # 1️⃣ Clone
-git clone https://github.com/fl0wwy/RasPi.git
+git clone https://github.com/fl0wwy/MyRasPi.git
 cd raspi-status
 
 # 2️⃣ Create virtual environment
