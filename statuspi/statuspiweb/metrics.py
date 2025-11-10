@@ -5,7 +5,7 @@ from math import ceil
 
 # Driver inclusion settings
 SKIP_FS = {"tmpfs", "devtmpfs", "squashfs", "overlay"}
-SKIP_MOUNT_PREFIX = ("/snap", "/proc", "/sys", "/run", "/dev", )  # /boot optional
+SKIP_MOUNT_PREFIX = ("/snap", "/proc", "/sys", "/run", "/dev", "/boot")  # /boot optional
 
 @dataclass
 class _NetState:
