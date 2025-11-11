@@ -56,10 +56,10 @@ pip install -r requirements.txt
 # 5️⃣ Launch the dashboard
 ./run.sh  
 ```
-### Then open your browser at http://"your-pi-ip":8000
+### Then open your browser at http://"your-pi-ip":8123
 To change the port:
 ```bash
-PORT=8123 ./run.sh
+PORT=your-port ./run.sh
 ```
 
 ## 🧾 Project Structure
