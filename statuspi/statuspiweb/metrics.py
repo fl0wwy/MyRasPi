@@ -68,6 +68,28 @@ def bps_to_human(n: float) -> str:
 
 _ping_re = re.compile(r'time[=<]([\d\.]+)\s*ms')
 
+def get_lan_ip():
+    """
+    Attempts to retrieve the local LAN IP address of the machine.
+    Returns the IP address as a string, or None if it cannot be determined.
+    """
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip_address = s.getsockname()[0]
+        s.close()
+        return ip_address
+    except Exception:
+        try:
+            hostname = socket.gethostname()
+            ip_address = socket.gethostbyname(hostname)
+            # Filter out loopback address if returned
+            if ip_address == "127.0.0.1":
+                return None 
+            return ip_address
+        except Exception:
+            return None
+
 def get_router_ip():
     """
     Detect the default gateway (router) IP from the system routing table.
@@ -515,7 +537,7 @@ def get_metrics():
             "up_human": bps_to_human(net["up_bps"]),
             "dn_human": bps_to_human(net["dn_bps"]),
         },
-        "int_ip": socket.gethostbyname(socket.gethostname()),
+        "int_ip": get_lan_ip(),
         "ext_ip": str(requests.get('https://api.ipify.org/').content)[1:].strip("'"),
         "internet_ms": ping_ms("8.8.8.8"),
         "router_ms": ping_ms(),
