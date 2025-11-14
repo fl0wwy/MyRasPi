@@ -8,7 +8,7 @@ unit.value = localStorage.getItem('unit') ?? 'C'
 
 async function loadMetrics() {
   try {
-    const r = await fetch("/metrics", { cache: "no-store" });
+    const r = await fetch(`/metrics?refresh_rate=${select.value}`, { cache: "no-store" });
     const m = await r.json();
     render(m);
     document.getElementById("refresh").textContent = m.timestamp;

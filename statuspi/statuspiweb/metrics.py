@@ -1,11 +1,14 @@
-import psutil, time, os, platform, socket, subprocess, sys, requests, re, shutil
-from datetime import datetime
+import psutil, time, os, platform, socket, subprocess, sys, requests, re, shutil, json
+from datetime import datetime, timedelta
 from dataclasses import dataclass
 from math import ceil
 
 # Driver inclusion settings
 SKIP_FS = {"tmpfs", "devtmpfs", "squashfs", "overlay"}
 SKIP_MOUNT_PREFIX = ("/snap", "/proc", "/sys", "/run", "/dev", "/boot")  # /boot optional
+
+CACHE_FILE = "cache.json"
+TIME_STRING_FORMAT = "%d/%m/%Y, %H:%M:%S"
 
 @dataclass
 class _NetState:
@@ -510,7 +513,7 @@ def get_metrics():
         model = f.read().strip()
 
     return {
-        "timestamp": datetime.now().strftime("%d/%m/%Y, %H:%M:%S"),
+        "timestamp": datetime.now().strftime(TIME_STRING_FORMAT),
         
         "cpu": {
             "usage": psutil.cpu_percent(),
@@ -551,3 +554,44 @@ def get_metrics():
         "python_version": sys.version,
         "architecture": platform.machine(),
     }
+
+def load_metrics(refresh_rate_ms):
+    """
+    Returns cached metrics if fresh; otherwise regenerates with get_metrics()
+    and atomically rewrites the cache.
+    """
+    refresh_delta = timedelta(milliseconds=int(refresh_rate_ms))
+
+    # Try read existing cache
+    try:
+        with open(CACHE_FILE, "r+", encoding="utf-8") as f:
+            try:
+                content = json.load(f)
+            except json.JSONDecodeError:
+                # Corrupt/partial file - regenerate
+                content = None
+
+            fresh = False
+            if content:
+                try:
+                    ts = datetime.strptime(content["timestamp"], TIME_STRING_FORMAT)
+                    fresh = (datetime.now() - ts) < refresh_delta
+                except Exception:
+                    fresh = False
+
+            if fresh:
+                return content
+
+            # stale or invalid - regenerate and overwrite
+            metrics = get_metrics()
+            f.seek(0)
+            json.dump(metrics, f, indent=4)
+            f.truncate()
+            return metrics
+
+    except FileNotFoundError:
+        # No cache yet - create it
+        metrics = get_metrics()
+        with open(CACHE_FILE, "w", encoding="utf-8") as f:
+            json.dump(metrics, f, indent=4)
+        return metrics
