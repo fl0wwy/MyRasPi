@@ -2,7 +2,7 @@
 
 A sleek, dark-themed web dashboard for monitoring your Raspberry Pi (or any Linux system) — built with **Django**, **psutil**, and **Raspberry Pi-specific metrics** such as power, temperature, and Wi-Fi strength.
 
-![screenshot](./example.png)
+![screenshot](./eg.png)
 
 ---
 
