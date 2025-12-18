@@ -127,6 +127,7 @@ tr li{
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: space-between;
 }
 
 li h5{
@@ -378,11 +379,17 @@ footer a{
 /* 2) Phones / narrow screens (481px – 767px) */
 @media (min-width: 481px) and (max-width: 767px) {
   /* portrait phones & small landscape phones */
+  header{
+    margin-top: 20px;
+  }
 }
 
 /* 3) Tablets / small devices (768px – 1023px) */
 @media (min-width: 768px) and (max-width: 1023px) {
   /* iPad portrait, small tablets */
+  header{
+    margin-top: 20px;
+  }
 }
 
 /* 4) Medium / laptops (1024px – 1279px) */
